@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->date('loan_date');
             $table->date('return_date')->nullable();
-            $table->boolean('devuelto')->default(false);
+            $table->boolean('returned')->default(false);
             $table->timestamps();
 
 
