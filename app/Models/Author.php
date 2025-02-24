@@ -9,4 +9,17 @@ class Author extends Model
 {
     /** @use HasFactory<\Database\Factories\AuthorFactory> */
     use HasFactory;
+
+    protected $fillable = ['name'];
+
+
+    /**
+     * Get all of the books for the Author
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function books(): HasMany
+    {
+        return $this->hasMany(Book::class);
+    }
 }
