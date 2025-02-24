@@ -55,20 +55,13 @@ class LoanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(string $id)
     {
         $loan = Loan::findOrFail($id);
+        $loan->book->update(['available' => true]);
+        $loan->returned = 1;
+        $loan->save();
 
-        $request->validate([
-            'return_date' => 'nullable|date|after:loan_date',
-            'returned' => 'boolean',
-        ]);
-
-        if ($request->has('returned') && $request->returned) {
-            $loan->book->update(['available' => true]);
-        }
-
-        $loan->update($request->all());
         return $loan;
     }
 
