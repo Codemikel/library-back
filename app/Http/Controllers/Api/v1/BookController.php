@@ -13,7 +13,11 @@ class BookController extends Controller
      */
     public function index()
     {
-        return Book::with(['author', 'genre'])->get();
+        return Book::with(['author', 'genre' => function ($query) {
+            $query->whereNull('deleted_at');
+        }])->whereHas('genre', function ($query) {
+            $query->whereNull('deleted_at');
+        })->get();
     }
 
     /**

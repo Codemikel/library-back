@@ -13,7 +13,19 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        return Author::all();
+        $authors = Author::withCount(['books' => function ($query) {
+            $query->whereHas('genre', function ($query) {
+                $query->whereNotNull('id')->whereNull('deleted_at');
+            });
+        }])->get()->map(function ($author) {
+            return [
+                'id' => $author->id,
+                'name' => $author->name,
+                'total_books' => $author->books_count,
+            ];
+        });
+
+        return response()->json($authors);
     }
 
     /**
@@ -49,6 +61,10 @@ class AuthorController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $author = Author::findOrFail($id);
+
+        $author->delete();
+
+        return response()->json(['message' => 'Autor eliminado correctamente'], 200);
     }
 }

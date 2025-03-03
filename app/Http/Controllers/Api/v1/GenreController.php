@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Genre;
+use App\Models\Book;
 
 class GenreController extends Controller
 {
@@ -13,7 +14,20 @@ class GenreController extends Controller
      */
     public function index()
     {
-        return Genre::all();
+
+        $mostLendedBooksByGenre = Genre::with(['books' => function ($query) {
+            $query->withCount('loans')->orderByDesc('loans_count');
+        }])->get()
+        ->map(function ($genre) {
+            return [
+                'id' => $genre->id,
+                'name' => $genre->name,
+                'most_lended_book' => optional($genre->books->first())->name,
+            ];
+        });
+
+        return response()->json($mostLendedBooksByGenre, 200);
+
     }
 
     /**
@@ -21,7 +35,11 @@ class GenreController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string'
+        ]);
+
+        return Genre::create($request->all());
     }
 
     /**
@@ -37,7 +55,14 @@ class GenreController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $genre = Genre::findOrFail($id);
+
+        $request->validate([
+            'name' => 'string|required'
+        ]);
+
+        $genre->update($request->all());
+        return $genre;
     }
 
     /**
@@ -45,6 +70,10 @@ class GenreController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $genre = Genre::findOrFail($id);
+
+        $genre->delete();
+
+        return response()->json(['message' => 'Género eliminado correctamente'], 200);
     }
 }
